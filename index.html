@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monitor TI - Beauty Color</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+      font-family: Arial, sans-serif;
+    }
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    .hidden {
+      display: none;
+    }
+    .info {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      color: #fff;
+      background: rgba(0,0,0,0.7);
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 15px;
+      z-index: 100;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Grafana BySeven -->
+  <iframe id="grafana" 
+          src="https://grafana.byseven.com.br/d/DWSW-KSJD/alertas-de-monitoramento-zabbix?orgId=78&from=now-5m&to=now&timezone=browser&var-maintenance=$__all&var-Atuacao=$__all&kiosk" 
+          frameborder="0"></iframe>
+  
+  <!-- GLPI -->
+  <iframe id="glpi" 
+          src="https://helpdesk.beautycolor.com.br/front/ticket.php" 
+          class="hidden" 
+          frameborder="0"></iframe>
+
+  <div class="info" id="info">
+    Alternando em <span id="tempo">30</span> segundos • Grafana ↔ GLPI
+  </div>
+
+  <script>
+    const grafanaFrame = document.getElementById('grafana');
+    const glpiFrame    = document.getElementById('glpi');
+    const info         = document.getElementById('info');
+    let atual = 'grafana';
+    
+    // Tempo de alternância em segundos (agora 30 segundos)
+    const segundos = 30;
+    const tempoMs = segundos * 1000;
+
+    function alternarTelas() {
+      if (atual === 'grafana') {
+        grafanaFrame.classList.add('hidden');
+        glpiFrame.classList.remove('hidden');
+        atual = 'glpi';
+      } else {
+        glpiFrame.classList.add('hidden');
+        grafanaFrame.classList.remove('hidden');
+        atual = 'grafana';
+      }
+      
+      // Mostra a informação por 2 segundos
+      info.style.display = 'block';
+      setTimeout(() => { info.style.display = 'none'; }, 2000);
+    }
+
+    // Alterna automaticamente a cada 30 segundos
+    setInterval(alternarTelas, tempoMs);
+
+    // Força refresh da tela ativa (evita congelamento)
+    setInterval(() => {
+      if (atual === 'grafana') {
+        grafanaFrame.src = grafanaFrame.src;
+      } else {
+        glpiFrame.src = glpiFrame.src;
+      }
+    }, tempoMs + 2000);
+
+    // Mostra info no início
+    setTimeout(() => { info.style.display = 'block'; }, 800);
+    setTimeout(() => { info.style.display = 'none'; }, 2800);
+  </script>
+</body>
+</html>
